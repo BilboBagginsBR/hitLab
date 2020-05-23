@@ -1,0 +1,22 @@
+{
+    "auto_format_on_save": true,
+    "arrowParens": "always",
+    "bracketSpacing": true,
+    "endOfLine": "lf",
+    "printWidth": 95,
+    "singleQuote": true,
+    "tabWidth": 2,
+    "trailingComma": "all",
+    "overrides": [
+      {
+        "files": "package*.json",
+        "options": {
+          "printWidth": 1000
+        }
+      }
+    ],
+    "auto_format_on_save_excludes": [
+      "*/node_modules/*",
+      "*.json"
+    ]
+  }
