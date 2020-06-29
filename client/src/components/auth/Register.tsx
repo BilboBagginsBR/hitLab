@@ -3,15 +3,17 @@ import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
-import { Link } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
-import {themeObj, useStyles} from './theme';
-
-
+import { themeObj, useStyles } from './theme';
+import { setAlert } from '../../actions/alert';
+import { registerAction } from '../../actions/auth';
+import { useDispatch, useSelector } from 'react-redux';
+import { rootState } from '../../actions/types';
 
 interface FormState {
   name: string;
@@ -20,11 +22,13 @@ interface FormState {
   confirmPassword: string;
 }
 
-
+const getIsAuthenticated = (state: rootState) => state.auth.isAuthenticated
 
 export const Register: FC = () => {
   const classes = useStyles();
   const theme = createMuiTheme(themeObj);
+  const isAuthenticated = useSelector(getIsAuthenticated)
+  const dispatch = useDispatch();
   const [formData, setFormData] = useState<FormState>({
     name: '',
     email: '',
@@ -35,15 +39,19 @@ export const Register: FC = () => {
   const { name, email, password, confirmPassword } = formData;
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({...formData, [e.currentTarget.name]: e.currentTarget.value})
-  }
+    setFormData({ ...formData, [e.currentTarget.name]: e.currentTarget.value });
+  };
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-     return console.log('bad password')
+      dispatch(setAlert('bad password', 'error'));
     } else {
-      console.log('Success')
+      dispatch(registerAction(formData))
     }
+  };
+
+  if (isAuthenticated) {
+    return <Redirect to='/dashboard'/>
   }
 
   return (
@@ -57,7 +65,11 @@ export const Register: FC = () => {
           <Typography component="h1" variant="h5">
             Sign up
           </Typography>
-          <form className={classes.form} noValidate onSubmit={(e: React.FormEvent<HTMLFormElement>) => onSubmit(e)}>
+          <form
+            className={classes.form}
+            noValidate
+            onSubmit={(e: React.FormEvent<HTMLFormElement>) => onSubmit(e)}
+          >
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <TextField
@@ -127,7 +139,9 @@ export const Register: FC = () => {
             </Button>
             <Grid container justify="flex-end">
               <Grid item>
-                <Link className={classes.bottmLink} to="/login">Already have an account? Sign in</Link>
+                <Link className={classes.bottmLink} to="/login">
+                  Already have an account? Sign in
+                </Link>
               </Grid>
             </Grid>
           </form>

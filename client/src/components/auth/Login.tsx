@@ -3,22 +3,29 @@ import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
-import { Link } from 'react-router-dom';
+import { Link,Redirect } from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import { themeObj, useStyles } from './theme';
+import { loginAction } from '../../actions/auth';
+import { useDispatch, useSelector } from 'react-redux';
+import { rootState } from '../../actions/types';
 
 interface FormState {
   email: string;
   password: string;
 }
 
+const getIsAuthenticated = (state: rootState) => state.auth.isAuthenticated
+
 export const Login: FC = () => {
   const classes = useStyles();
   const theme = createMuiTheme(themeObj);
+  const dispatch = useDispatch();
+  const isAuthenticated = useSelector(getIsAuthenticated)
   const [formData, setFormData] = useState<FormState>({
     email: '',
     password: '',
@@ -31,9 +38,12 @@ export const Login: FC = () => {
   };
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    console.log('Success');
+    dispatch(loginAction(formData))
   };
+
+  if (isAuthenticated) {
+    return <Redirect to='/dashboard'/>
+  }
 
   return (
     <ThemeProvider theme={theme}>
@@ -61,7 +71,7 @@ export const Login: FC = () => {
                   id="email"
                   label="Email Address"
                   name="email"
-                  autoComplete='off'
+                  autoComplete="off"
                   value={email}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(e)}
                 />
@@ -92,7 +102,9 @@ export const Login: FC = () => {
             </Button>
             <Grid container justify="flex-end">
               <Grid item>
-                <Link className={classes.bottmLink} to="/register">Do not have an account? Sign up</Link>
+                <Link className={classes.bottmLink} to="/register">
+                  Do not have an account? Sign up
+                </Link>
               </Grid>
             </Grid>
           </form>
@@ -101,3 +113,5 @@ export const Login: FC = () => {
     </ThemeProvider>
   );
 };
+
+

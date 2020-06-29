@@ -6,16 +6,27 @@ import { Login } from './components/auth/Login';
 import { Register } from './components/auth/Register';
 import './App.css';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import { Provider } from 'react-redux';
-import store from './store';
+import AlertMessage from './components/layout/AlertMessage';
+import setAuthToken from './utils/setAuthToken';
+import { loadUserAction } from './actions/auth';
+import {useDispatch} from 'react-redux'
+
+if (localStorage.token) {
+  setAuthToken(localStorage.token);
+}
 
 function App() {
+  const dispatch = useDispatch();
+  React.useEffect(() => {
+    dispatch(loadUserAction());
+  }, []);
+
   return (
-    <Provider store={store}>
       <Router>
         <React.Fragment>
           <CssBaseline />
           <NavBar />
+          <AlertMessage />
           <Switch>
             <Route exact path="/">
               <StartPage />
@@ -29,7 +40,6 @@ function App() {
           </Switch>
         </React.Fragment>
       </Router>
-    </Provider>
   );
 }
 
