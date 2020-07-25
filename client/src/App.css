@@ -5,4 +5,11 @@ body {
 * {
     margin: 10px;
     text-decoration: none;
+    height: 100vh;
+}
+
+#root {
+    height: 100%;
+    background: #121212;
+    overflow: hidden;
 }
