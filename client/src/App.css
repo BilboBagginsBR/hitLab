@@ -1,4 +1,10 @@
 body {
+    background-color: lightblue;
+}
+
+* {
+    margin: 10px;
+    text-decoration: none;
     height: 100vh;
 }
 

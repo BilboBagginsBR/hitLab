@@ -1,4 +1,12 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+
+const StartPage = () => {
+  return (
+    <div>
+      <Link to="/register">Sign up</Link>
+      <Link to="/login">Login</Link>
+    </div>
 import { Box, Typography, Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
