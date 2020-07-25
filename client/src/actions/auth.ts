@@ -1,32 +1,32 @@
-import { REGISTER_FAIL, REGISTER_SUCCESS, LOGIN_SUCCESS, LOGOUT, LOGIN_FAIL, registerActionType, loginActionType, USER_LOADED, AUTH_ERROR } from './types'
+import { registerDataType } from './types'
+import { Dispatch } from 'redux'
+import { USER_LOADED, AUTH_ERROR, REGISTER_SUCCESS, REGISTER_FAIL, LOGIN_SUCCESS, LOGIN_FAIL, CLEAR_PROFILE, LOGOUT } from './actionTypes'
 import { setAlert } from './alert'
-import setAuthToken from '../utils/setAuthToken'
-import axios from 'axios';
 
-
-
-export const loadUserAction = () => async (dispatch: any) => {
-    if (localStorage.token) {
-        setAuthToken(localStorage.token)
-    }
-
+export const loadUser = () => async (dispatch: Dispatch<any>) => {
     try {
-        const res = await axios.get('/api/auth')
-
+        const res = await fetch('/api/auth')
+        const data = await res.json();
+        if (!res.ok) {
+            let error: any = new Error();
+            error = { ...error, errors: data }
+            throw error
+        }
         dispatch({
             type: USER_LOADED,
-            payload: res.data
+            payload: data
         })
 
     } catch (error) {
+        const errors = error.errors.errors;
+        if (errors) errors.forEach((error: any) => dispatch(setAlert(error.msg, 'red')))
         dispatch({
             type: AUTH_ERROR
         })
     }
 }
 
-export const registerAction = ({ name, email, password }: registerActionType) => async (dispatch: any) => {
-
+export const register = ({ name, email, password }: registerDataType) => async (dispatch: Dispatch<any>) => {
     try {
         const response = await fetch('/api/users', {
             method: 'POST',
@@ -34,66 +34,73 @@ export const registerAction = ({ name, email, password }: registerActionType) =>
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({ name, email, password })
-        });
-        const data = await response.json();
+        })
+
+        const data: { token: string } = await response.json();
         if (!response.ok) {
             let error: any = new Error();
-            error = { ...error, serverError: data }
+            error = { ...error, errors: data }
             throw error
         }
+
         dispatch({
             type: REGISTER_SUCCESS,
             payload: data
         })
-        
-        dispatch(loadUserAction())
-    } catch (error) {
-        const errors = error.serverError.errors
 
-        if (errors) {
-            errors.forEach((err: any) => dispatch(setAlert(err.msg, 'error')))
-        }
+        dispatch(loadUser())
+
+    } catch (error) {
+        const errors = error.errors.errors;
+        if (errors) errors.forEach((error: any) => dispatch(setAlert(error.msg, 'red')))
         dispatch({
             type: REGISTER_FAIL
         })
     }
-
 }
 
-export const loginAction = ({ email, password }: loginActionType) => async (dispatch: any) => {
+
+// Login User
+export const login = (email: string, password: string) => async (dispatch: Dispatch<any>) => {
+
 
     try {
-        const response = await fetch('/api/auth', {
+        const res = await fetch('/api/auth', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({ email, password })
         });
-        const data = await response.json();
-        if (!response.ok) {
+
+        const data = await res.json();
+        if (!res.ok) {
             let error: any = new Error();
-            error = { ...error, serverError: data }
+            const { errors } = data
+            error = { ...error, errors }
             throw error
         }
+
         dispatch({
             type: LOGIN_SUCCESS,
             payload: data
-        })
-        dispatch(loadUserAction())
-    } catch (error) {
-        const errors = error.serverError.errors
+        });
+
+        dispatch(loadUser());
+    } catch (err) {
+        const errors = err.errors
 
         if (errors) {
-            errors.forEach((err: any) => dispatch(setAlert(err.msg, 'error')))
+            errors.forEach((error: any) => dispatch(setAlert(error.msg, 'red')));
         }
+
         dispatch({
             type: LOGIN_FAIL
-        })
+        });
     }
+};
 
-}
 
-export const logoutActioin = () => (dispatch: any) => {
-    dispatch({type: LOGOUT})
+export const logout = () => (dispatch: Dispatch) => {
+    dispatch({ type: LOGOUT })
 }

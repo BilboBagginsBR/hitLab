@@ -1,46 +1,28 @@
-import React from 'react';
-import NavBar from './components/NavBar';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import StartPage from './components/StartPage';
-import { Login } from './components/auth/Login';
-import { Register } from './components/auth/Register';
+import React, { useEffect } from 'react';
 import './App.css';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import NavBar from './components/NavBar';
+import { BrowserRouter as Router } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import AlertMessage from './components/layout/AlertMessage';
-import setAuthToken from './utils/setAuthToken';
-import { loadUserAction } from './actions/auth';
-import {useDispatch} from 'react-redux'
+import { loadUser } from './actions/auth';
+import Routes from './components/routing/Routes';
 
-if (localStorage.token) {
-  setAuthToken(localStorage.token);
-}
-
-function App() {
+const App = () => {
   const dispatch = useDispatch();
-  React.useEffect(() => {
-    dispatch(loadUserAction());
-  }, []);
+
+  useEffect(() => {
+    if (document.cookie.match('x-auth-token')) {
+      dispatch(loadUser());
+    }
+  }, [dispatch]);
 
   return (
-      <Router>
-        <React.Fragment>
-          <CssBaseline />
-          <NavBar />
-          <AlertMessage />
-          <Switch>
-            <Route exact path="/">
-              <StartPage />
-            </Route>
-            <Route path="/login">
-              <Login />
-            </Route>
-            <Route path="/register">
-              <Register />
-            </Route>
-          </Switch>
-        </React.Fragment>
-      </Router>
+    <Router>
+      <NavBar />
+      <AlertMessage />
+      <Routes />
+    </Router>
   );
-}
+};
 
 export default App;
